@@ -89,10 +89,11 @@ top10, bottom10 = top_bottom_routes(scored, route_col="Route (State)", n=min(10,
 col1, col2 = st.columns(2)
 with col1:
     st.subheader(f"Top {len(top10)} Most Efficient Routes")
-    st.dataframe(top10[["Route (State)", "Avg_Lead_Time", "Total_Shipments", "Route_Efficiency_Score"]])
+    display_df = top10[["Route (State)", "Avg_Lead_Time", "Total_Shipments", "Route_Efficiency_Score"]].fillna(0)
+st.dataframe(display_df)
 with col2:
     st.subheader(f"Bottom {len(bottom10)} Least Efficient Routes")
-    st.dataframe(bottom10[["Route (State)", "Avg_Lead_Time", "Total_Shipments", "Route_Efficiency_Score"]])
+    st.dataframe(bottom10[["Route (State)", "Avg_Lead_Time", "Total_Shipments", "Route_Efficiency_Score"]].fillna(0))
 
 st.download_button(
     "Download route summary (CSV)",
@@ -121,21 +122,20 @@ else:
 canada_states = set(geo["by_state"]["State/Province"]) - set(US_STATE_ABBR.keys())
 if canada_states:
     st.caption(f"Canadian provinces in data (not on map above): {', '.join(sorted(canada_states))}")
-    st.dataframe(geo["by_state"][geo["by_state"]["State/Province"].isin(canada_states)])
-
+    st.dataframe(geo["by_state"][geo["by_state"]["State/Province"].isin(canada_states)].fillna(0))
 bottlenecks = flag_bottlenecks(route_summary)
 st.subheader("Flagged Bottleneck Routes")
 flagged = bottlenecks[bottlenecks["Is_Bottleneck"]]
 if flagged.empty:
     st.info("No routes crossed the volume + lead-time thresholds for this filter.")
 else:
-    st.dataframe(flagged)
+   st.dataframe(flagged.fillna(0))
 
 st.header("Ship Mode Comparison")
 sm_summary = ship_mode_summary(filtered)
 fig_sm = px.bar(sm_summary, x="Ship Mode", y="Avg_Lead_Time", title="Avg Lead Time by Ship Mode")
 st.plotly_chart(fig_sm, use_container_width=True)
-st.dataframe(sm_summary)
+st.dataframe(sm_summary.fillna(0))
 
 st.header("Trend & Forecast")
 trend = monthly_trend(filtered)
